@@ -187,12 +187,8 @@
 // import mongoose
 import mongoose from "mongoose";
 
-// establish connection
-mongoose.connect("mongodb+srv://kawthar1235_db_user:AG3BKgjGBQfKmIp3@cluster0.wusbpjk.mongodb.net/labdb?retryWrites=true&w=majority")
-.then(() => console.log("✅ Connected to MongoDB"))
-.catch(err => console.log(err));
+const uri = "mongodb+srv://kawthar1235_db_user:AG3BKgjGBQfKmIp3@cluster0.wusbpjk.mongodb.net/labdb?retryWrites=true&w=majority";
 
-// define schema
 const studentSchema = new mongoose.Schema({
   name: String,
   age: Number,
@@ -201,9 +197,8 @@ const studentSchema = new mongoose.Schema({
 
 const Student = mongoose.model("Student", studentSchema);
 
-
-// create document
 async function createStudents() {
+  await Student.deleteMany({});
   await Student.insertMany([
     { name: "Ali", age: 21, major: "CS" },
     { name: "Sara", age: 23, major: "SE" }
@@ -211,30 +206,37 @@ async function createStudents() {
   console.log("✅ Inserted");
 }
 
-// read document
 async function readStudents() {
   const all = await Student.find();
-  console.log(all);
+  console.log("📄 Students:", all);
 }
 
-// update document
 async function updateStudent() {
   await Student.updateOne({ name: "Ali" }, { age: 22 });
   console.log("✅ Updated Ali");
 }
 
-// delete document
 async function deleteStudent() {
   await Student.deleteOne({ name: "Sara" });
   console.log("✅ Deleted Sara");
 }
 
 async function runAll() {
-  await createStudents();
-  await readStudents();
-  await updateStudent();
-  await deleteStudent();
-  await readStudents();
+  try {
+    await mongoose.connect(uri);
+    console.log("✅ Connected to MongoDB");
+
+    await createStudents();
+    await readStudents();
+    await updateStudent();
+    await deleteStudent();
+    await readStudents();
+
+    await mongoose.disconnect();
+    console.log("✅ Done");
+  } catch (err) {
+    console.log("❌ Error:", err.message);
+  }
 }
 
 runAll();
